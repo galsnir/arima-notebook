@@ -23,9 +23,9 @@ A Jupyter notebook that builds an **ARIMA** (AutoRegressive Integrated Moving Av
 
 [ARIMA](https://en.wikipedia.org/wiki/Autoregressive_integrated_moving_average) is one of the workhorses of classical time-series forecasting. It models a (possibly non-stationary) series with three components:
 
-- **AR(p)** — \(p\) lagged observations of the series itself.
-- **I(d)** — \(d\) successive differencings to make the series stationary.
-- **MA(q)** — \(q\) lagged forecast errors.
+- **AR(p)** — $p$ lagged observations of the series itself.
+- **I(d)** — $d$ successive differencings to make the series stationary.
+- **MA(q)** — $q$ lagged forecast errors.
 
 This notebook implements the model from scratch as a `ManualARIMA` class, then tests it against a known-truth simulated process and a real-world financial series.
 
@@ -33,19 +33,19 @@ This notebook implements the model from scratch as a `ManualARIMA` class, then t
 
 | Part | Description |
 | --- | --- |
-| **1 — Design the algorithm** | Explanation of the AR, I, and MA components, parameter triplet \((p, d, q)\), stationarity, and how the manual implementation is structured. |
+| **1 — Design the algorithm** | Explanation of the AR, I, and MA components, parameter triplet $(p, d, q)$, stationarity, and how the manual implementation is structured. |
 | **2 — Implement the algorithm** | The `ManualARIMA` class: `fit`, `predict`, residual handling, AR / MA coefficient estimation, drift / trend handling, and a prediction cap to avoid runaway forecasts. |
-| **3 — Validate on simulated data** | A controlled "unit test" on an ARIMA(1, 1, 1) process with known coefficients (\(\phi_1 = 0.7\), \(\theta_1 = 0.3\)), confirming the implementation captures the underlying dynamics. |
-| **4 — Real-world experiment (AMZN)** | EDA, stationarity testing (ADF), ACF / PACF inspection, grid search over \((p, d, q)\), residual diagnostics, forecasting, and quantitative comparison vs. `statsmodels.tsa.arima.model.ARIMA`. |
+| **3 — Validate on simulated data** | A controlled "unit test" on an ARIMA(1, 1, 1) process with known coefficients ($\phi_1 = 0.7$, $\theta_1 = 0.3$), confirming the implementation captures the underlying dynamics. |
+| **4 — Real-world experiment (AMZN)** | EDA, stationarity testing (ADF), ACF / PACF inspection, grid search over $(p, d, q)$, residual diagnostics, forecasting, and quantitative comparison vs. `statsmodels.tsa.arima.model.ARIMA`. |
 | **5 — Report** | A written summary of differences between the manual and library implementations and overall conclusions. |
 
 ## Algorithm
 
 The `ManualARIMA(p, d, q)` class follows the standard ARIMA recipe:
 
-1. **Differencing.** Apply \(d\) successive differences to the input series until it is (approximately) stationary.
-2. **AR estimation.** Fit AR coefficients \(\phi_1, \dots, \phi_p\) on the differenced series.
-3. **MA estimation.** Estimate MA coefficients \(\theta_1, \dots, \theta_q\) from the residuals of the AR fit.
+1. **Differencing.** Apply $d$ successive differences to the input series until it is (approximately) stationary.
+2. **AR estimation.** Fit AR coefficients $\phi_1, \dots, \phi_p$ on the differenced series.
+3. **MA estimation.** Estimate MA coefficients $\theta_1, \dots, \theta_q$ from the residuals of the AR fit.
 4. **Forecasting.** Iteratively roll the model forward, using AR + MA contributions and the in-sample residual cache.
 5. **Inverse differencing.** Cumulatively sum predictions back to the original scale, optionally adding a learned drift / trend term.
 6. **Realism guard.** A `max_value` cap (twice the maximum observed value during fitting) prevents the model from producing absurd forecasts (e.g. negative prices or runaway extrapolations).
@@ -63,7 +63,7 @@ Key attributes tracked on the class:
 ### 1. Simulated ARIMA(1, 1, 1)
 
 - 110 points (100 train / 10 test).
-- AR coefficient \(\phi_1 = 0.7\), MA coefficient \(\theta_1 = 0.3\), Gaussian noise \(\mathcal{N}(0, 1)\).
+- AR coefficient $\phi_1 = 0.7$, MA coefficient $\theta_1 = 0.3$, Gaussian noise $\mathcal{N}(0, 1)$.
 - Generated as an ARMA(1, 1) process integrated with a cumulative sum, so the first difference returns a stationary series.
 
 This serves as a **unit test**: with known parameters, we can verify that the manual implementation recovers them and produces sensible residuals.
@@ -84,11 +84,11 @@ The real-world experiment follows standard time-series best practices:
 2. **EDA.**
    - Summary statistics, rolling mean / std plots.
    - Stationarity tests: **Augmented Dickey-Fuller (ADF)** on raw and differenced series.
-   - **ACF / PACF** plots to suggest reasonable starting values for \(p\) and \(q\).
+   - **ACF / PACF** plots to suggest reasonable starting values for $p$ and $q$.
    - Seasonal decomposition (`statsmodels.tsa.seasonal.seasonal_decompose`).
    - Histogram, lag plots, outlier inspection (e.g. stock splits), yearly returns aggregation.
 3. **Train/test split.** Chronological split — never random — to respect causality.
-4. **Model selection.** Grid search over a small range of \((p, d, q)\) using AIC / BIC and out-of-sample error.
+4. **Model selection.** Grid search over a small range of $(p, d, q)$ using AIC / BIC and out-of-sample error.
 5. **Diagnostics.** Residual normality / autocorrelation checks (Ljung-Box).
 6. **Forecasting.** Multi-step-ahead predictions plotted against the held-out test set.
 7. **Evaluation metrics.**
