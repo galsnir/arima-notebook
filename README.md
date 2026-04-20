@@ -2,8 +2,6 @@
 
 A Jupyter notebook that builds an **ARIMA** (AutoRegressive Integrated Moving Average) model from scratch, validates it on simulated data, and then applies both the custom and `statsmodels` implementations to forecast Amazon (AMZN) stock prices.
 
-Authors: **Gal Snir** (313588279) and **Efraim Yosofov** (318765716). Home Assignment 3.
-
 ---
 
 ## Table of contents
